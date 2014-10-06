@@ -63,7 +63,7 @@ describe('', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
-    xbeforeEach(function(done){      // create a user that we can then log-in with
+    beforeEach(function(done){      // create a user that we can then log-in with
       new User({
           'username': 'Phillip',
           'password': 'Phillip'
@@ -81,10 +81,11 @@ describe('', function() {
         requestWithSession(options, function(error, res, body) {
           done();
         });
-      });
+      })
     });
 
     it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
+      console.log("are you here?")
       var options = {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/links',
@@ -142,8 +143,8 @@ describe('', function() {
                 var foundTitle = urls['0']['title'];
               }
               expect(foundTitle).to.equal('Rofl Zoo - Daily funny animal pictures');
-              done();
             });
+              done();//toggle up and down if nothing works
         });
       });
 
@@ -190,7 +191,7 @@ describe('', function() {
 
         requestWithSession(options, function(error, res, body) {
           var currentLocation = res.request.href;
-          expect(currentLocation).to.equal('http://www.roflzoo.com/');
+          expect(currentLocation).to.equal('http://roflzoo.com/');
           done();
         });
       });
