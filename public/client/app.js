@@ -22,6 +22,7 @@ window.Shortly = Backbone.View.extend({
   },
 
   renderIndexView: function(e){
+    console.log('clicked');
     e && e.preventDefault();
     this.router.navigate('/', { trigger: true });
   },
@@ -30,6 +31,11 @@ window.Shortly = Backbone.View.extend({
     e && e.preventDefault();
     this.router.navigate('/create', { trigger: true });
   },
+
+  // logout: function(){
+  //   console.log(this);
+  // //   this.renderIndexView:
+  // },
 
   updateNav: function(routeName){
     this.$el.find('.navigation li a')

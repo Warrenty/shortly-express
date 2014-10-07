@@ -30,11 +30,9 @@ app.use(session({
 
 
 function restrict(req, res, next) {
-  console.log(req.session.user);
   if (req.session.user) {
     next();
   } else {
-    // console.log(req.session)
     req.session.error = 'Access denied!';
     res.redirect('login');
   }
@@ -54,17 +52,15 @@ function(req, res) {
 app.get('/links', restrict,
 function(req, res) {
   Links.reset().fetch().then(function(links) {
-    // console.log(links.models);
-    // console.log(links);
     res.send(200, links.models);
   });
 });
+
 
 app.post('/links',
 function(req, res) {
   var uri = req.body.url;
 
-  // console.log(!util.isValidUrl(uri), 'what is this value that is showing')
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.send(404);
@@ -110,7 +106,7 @@ app.post('/signup',
       Users.add(data.attributes);
       login(req, res);
     }).catch(function(error){
-      console.log("failed because:", error);
+      console.log("failed because:", error);// Do not need
     })
   })
 
@@ -123,6 +119,11 @@ app.post('/login',
   function(req,res){login(req, res)}
   );
 
+app.get('/logout',
+function(req, res){
+  req.session.destroy();
+  res.redirect('login');
+})
 
 var login = function(req, res){
   new User({username: req.body.username}).fetch().then(function(user){
