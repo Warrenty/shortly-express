@@ -59,7 +59,7 @@ describe('', function() {
       });
   });
 
-  describe('Link creation:', function(){
+  xdescribe('Link creation:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -84,8 +84,8 @@ describe('', function() {
       })
     });
 
-    it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
-      console.log("are you here?")
+    xit('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
+      // console.log("are you here?")
       var options = {
         'method': 'POST',
         'uri': 'http://127.0.0.1:4568/links',
@@ -213,7 +213,7 @@ describe('', function() {
 
   }); // 'Link creation'
 
-  xdescribe('Priviledged Access:', function(){
+  describe('Priviledged Access:', function(){
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {

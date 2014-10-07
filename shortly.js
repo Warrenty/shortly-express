@@ -3,14 +3,12 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 
-
 var db = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
-
 var app = express();
 
 app.set('views', __dirname + '/views');
@@ -21,25 +19,37 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+var session = require('express-session');
 
-function restrict(req, res, next){
-  console.log(req.body);
-  console.log(req.path);
-  next();
+// app.use(cookieParser('shhhh, very secret'));
+app.use(session({
+  secret:'stuff',
+  resave: false,
+  saveUninitialized: true
+}));
+
+
+function restrict(req, res, next) {
+  if (false) {
+    next();
+  } else {
+    req.session.error = 'Access denied!';
+    res.redirect('login');
+  }
 }
 
-app.get('/',
+app.get('/', restrict,
 function(req, res) {
   res.redirect('login')
   res.render('login');
 });
 
-app.get('/create',
+app.get('/create', restrict,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links',
+app.get('/links', restrict,
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     // console.log(links.models);
