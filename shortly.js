@@ -30,9 +30,11 @@ app.use(session({
 
 
 function restrict(req, res, next) {
-  if (false) {
+  console.log(req.session.user);
+  if (req.session.user) {
     next();
   } else {
+    // console.log(req.session)
     req.session.error = 'Access denied!';
     res.redirect('login');
   }
@@ -40,8 +42,8 @@ function restrict(req, res, next) {
 
 app.get('/', restrict,
 function(req, res) {
-  res.redirect('login')
-  res.render('login');
+  // res.redirect('index')
+  res.render('index');
 });
 
 app.get('/create', restrict,
@@ -102,10 +104,42 @@ function(req, res) {
   res.render('signup');
 });
 
+app.post('/signup',
+  function(req, res){
+    new User(req.body).save().then(function(data){
+      Users.add(data.attributes);
+      login(req, res);
+    }).catch(function(error){
+      console.log("failed because:", error);
+    })
+  })
+
 app.get('/login',
 function(req, res) {
   res.render('login');
 });
+
+app.post('/login',
+  function(req,res){login(req, res)}
+  );
+
+
+var login = function(req, res){
+  new User({username: req.body.username}).fetch().then(function(user){
+    if(user){
+      if(user.attributes.username === req.body.username && user.attributes.password === req.body.password){
+        req.session.user = req.body.username;
+        res.redirect('/');
+      } else{
+        // "WRONG USERNAME/PASSWORD"
+        res.redirect('login')
+      }
+    }else{
+      //USERNAME NOT FOUND
+      res.redirect('/login')
+    }
+  })
+}
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
