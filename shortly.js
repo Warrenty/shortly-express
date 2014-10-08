@@ -2,6 +2,8 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
+var bcrypt = require('bcrypt-nodejs');
+var promise = require('bluebird');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -27,6 +29,7 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
+
 
 
 function restrict(req, res, next) {
@@ -102,12 +105,26 @@ function(req, res) {
 
 app.post('/signup',
   function(req, res){
-    new User(req.body).save().then(function(data){
-      Users.add(data.attributes);
-      login(req, res);
-    }).catch(function(error){
-      console.log("failed because:", error);// Do not need
-    })
+
+    promise.promisify(bcrypt.hash)(req.body.password,null,null).then(
+      function(hash){
+      console.log(hash);
+      req.body.password = hash;
+      console.log(req.body.password, "BODY")
+      return req.body.password;
+    }).then(function(){
+      new User(req.body).save().then(function(data){
+        login(req, res);
+      })
+    }).catch(function(err){console.log('failed because: ', err)});
+
+    // var hasher = bcrypt.hash;
+    // console.log(hasher);
+    // hasher(req.body.password, null, null, function(err, hash){
+    //   console.log('in hasher');
+    // })
+
+    // console.log("BODYYYY: ", req.body);
   })
 
 app.get('/login',
@@ -128,13 +145,15 @@ function(req, res){
 var login = function(req, res){
   new User({username: req.body.username}).fetch().then(function(user){
     if(user){
-      if(user.attributes.username === req.body.username && user.attributes.password === req.body.password){
-        req.session.user = req.body.username;
-        res.redirect('/');
-      } else{
-        // "WRONG USERNAME/PASSWORD"
-        res.redirect('login')
-      }
+      promise.promisify(bcrypt.compare)(req.body.password, user.attributes.password).then(
+        function(match){
+          if(match && user.attributes.username === req.body.username){
+            req.session.user = req.body.username;
+            res.redirect('/');
+          } else{// "WRONG USERNAME/PASSWORD"
+            res.redirect('login')
+          }
+        })
     }else{
       //USERNAME NOT FOUND
       res.redirect('/login')
